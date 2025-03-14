@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { User } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import { login, loginSchema, type LoginData } from '../services/auth';
+import { Mail, Lock } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -22,6 +22,7 @@ const Login = () => {
       await login(validatedData);
       navigate('/contacts');
     } catch (err) {
+      console.error('Login error:', err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -33,63 +34,88 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mb-4">
-            <User className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-[#083F46] flex relative overflow-hidden">
+      {/* Main background shape */}
+      <div className="absolute w-full h-full">
+        <div className="absolute -left-[30%] -top-[20%] w-[150%] aspect-square rounded-full bg-[#072F35] transform rotate-12"></div>
+      </div>
+      
+      {/* Cover image - positioned to the right side */}
+      <div className="absolute right-0 top-0 h-full">
+        <img 
+          src="src/asssets/images/cover.png" 
+          alt=""
+          className="h-full w-auto object-contain opacity-100"
+        />
+      </div>
+
+      {/* Logo - top left corner */}
+      <div className="absolute top-8 left-8 z-20">
+        <img 
+          src="src/asssets/images/twc.png" 
+          alt="Logo" 
+          className="h-12"
+        />
+      </div>
+      
+      <div className="container mx-auto px-8 py-16 z-10 flex flex-col justify-center">
+        <div className="max-w-md">
+          <div className="mb-16">
+            <h1 className="text-white text-5xl font-bold mb-2">Hi there,</h1>
+            <p className="text-white text-3xl font-light leading-tight">Welcome to our</p>
+            <p className="text-white text-3xl font-light leading-tight">contacts portal</p>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Welcome Back</h1>
-          <p className="text-gray-600 mt-2">Please enter your details</p>
+
+          {error && (
+            <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="relative">
+              <Mail className="absolute left-5 top-1/2 transform -translate-y-1/2 text-[#083F46]" size={20} />
+              <input
+                type="email"
+                id="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full pl-14 pr-5 py-3 rounded-[50px] border-none focus:ring-2 focus:ring-white outline-none transition-all bg-white text-[#083F46] text-xl"
+                placeholder="e-mail"
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="relative">
+              <Lock className="absolute left-5 top-1/2 transform -translate-y-1/2 text-[#083F46]" size={20} />
+              <input
+                type="password"
+                id="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full pl-14 pr-5 py-3 rounded-[50px] border-none focus:ring-2 focus:ring-white outline-none transition-all bg-white text-[#083F46] text-xl"
+                placeholder="password"
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="flex items-center pt-8">
+              <button
+                type="submit"
+                className="px-10 py-2 rounded-[50px] border border-white text-white text-xl hover:bg-white hover:bg-opacity-10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Loading...' : 'login'}
+              </button>
+              
+              <span className="text-white text-xl ml-4">
+                or <Link to="/register" className="underline ml-1">Click here to Register</Link>
+              </span>
+            </div>
+          </form>
         </div>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-              placeholder="Enter your email"
-              required
-              disabled={isLoading}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-              placeholder="Enter your password"
-              required
-              disabled={isLoading}
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
       </div>
     </div>
   );

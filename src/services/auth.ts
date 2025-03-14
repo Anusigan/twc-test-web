@@ -9,22 +9,32 @@ export const loginSchema = z.object({
 
 export type LoginData = z.infer<typeof loginSchema>;
 
-export const login = async (data: LoginData) => {
-  const response = await fetch(`${API_URL}/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    throw new Error('Invalid credentials');
+export const login = async (data: LoginData): Promise<User> => {
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Login failed with status: ${response.status}`);
+    }
+    
+    const user = await response.json();
+    // Store user in localStorage or context
+    localStorage.setItem('user', JSON.stringify(user));
+    return user;
+  } catch (error) {
+    // Check if it's a network error (failed to fetch)
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Unable to connect to the server. Please check your internet connection or try again later.');
+    }
+    throw error;
   }
-
-  const result = await response.json();
-  localStorage.setItem('token', result.token);
-  return result;
 };
 
 export const logout = () => {
