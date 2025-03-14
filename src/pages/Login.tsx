@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { login, loginSchema, type LoginData } from '../services/auth';
-import { Mail, Lock } from 'lucide-react';
+import { login, loginSchema, type LoginData, isAuthenticated } from '../services/auth';
+import { Mail, Lock, Info } from 'lucide-react';
+import { isMockingEnabled, getMockCredentials } from '../mocks/mockAuth';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -11,6 +12,24 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate('/contacts');
+    }
+  }, [navigate]);
+
+  // For easy login in mock mode
+  const useMockCredentials = () => {
+    if (isMockingEnabled) {
+      const credentials = getMockCredentials();
+      setFormData({
+        email: credentials.email,
+        password: credentials.password
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,18 +62,26 @@ const Login = () => {
       {/* Cover image - positioned to the right side */}
       <div className="absolute right-0 top-0 h-full">
         <img 
-          src="src/asssets/images/cover.png" 
+          src="/assets/images/cover.png" 
           alt=""
           className="h-full w-auto object-contain opacity-100"
+          onError={(e) => {
+            // Fallback if image doesn't load
+            e.currentTarget.style.display = 'none';
+          }}
         />
       </div>
 
       {/* Logo - top left corner */}
       <div className="absolute top-8 left-8 z-20">
         <img 
-          src="src/asssets/images/twc.png" 
+          src="/assets/images/twc.png" 
           alt="Logo" 
           className="h-12"
+          onError={(e) => {
+            // Fallback if image doesn't load
+            e.currentTarget.style.display = 'none';
+          }}
         />
       </div>
       
@@ -65,6 +92,23 @@ const Login = () => {
             <p className="text-white text-3xl font-light leading-tight">Welcome to our</p>
             <p className="text-white text-3xl font-light leading-tight">contacts portal</p>
           </div>
+
+          {isMockingEnabled && (
+            <div className="mb-6 p-3 bg-blue-100 border border-blue-200 text-blue-800 rounded-lg flex items-start">
+              <Info className="mr-2 mt-0.5 flex-shrink-0" size={18} />
+              <div>
+                <p className="font-medium">Mock Mode Active</p>
+                <p className="text-sm">Use test email: {getMockCredentials().email}</p>
+                <p className="text-sm">Or with password: {getMockCredentials().password}</p>
+                <button 
+                  onClick={useMockCredentials}
+                  className="text-blue-600 underline text-sm mt-1"
+                >
+                  Fill with test credentials
+                </button>
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg">
